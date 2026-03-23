@@ -1,4 +1,5 @@
 // app/(tabs)/index.tsx
+import { UseGetHeading } from "@/axios/api";
 import SectionCard from "@/components/SectionCard";
 import { TasksGroup } from "@/types/type";
 import { useState } from "react";
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 
 export default function Home() {
+const {data: headingData} = UseGetHeading();
   const [groups, setGroups] = useState<TasksGroup[]>([]);
   const [heading, setHeading] = useState("");
 

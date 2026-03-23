@@ -1,5 +1,5 @@
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { storage } from "./helper.axios";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -8,10 +8,11 @@ const api = axios.create({
 });
 
 
+
 // 🔐 REQUEST INTERCEPTOR
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem("app_session_id");
+    const token = await storage.getToken();
 
     if (token) {
       config.headers["app-session-id"] = token;
@@ -31,11 +32,8 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       error.response?.data?.message === "Unauthorized"
     ) {
-      // clear storage
-      await AsyncStorage.removeItem("app_session_id");
-      await AsyncStorage.removeItem("user");
 
-      // ❌ cannot use window.location
+      await storage.clear()
       // we will handle redirect manually in UI
     }
 

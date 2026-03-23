@@ -7,10 +7,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
+import { UseSendOtp, UseVerifyOtp } from "@/axios/auth.api";
+import { handleError } from "@/axios/error";
+import { storage } from "@/axios/helper.axios";
 
 export default function login() {
+  const postsendotpMutation = UseSendOtp();
+  const postverifyotpMutation = UseVerifyOtp(); 
   const router = useRouter();
-
+console.log(process.env.EXPO_PUBLIC_AUTH_URL);
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -28,12 +33,21 @@ export default function login() {
       }
 
       setLoading(true);
+      await postsendotpMutation.mutateAsync({
+        phone: phone,
+        client_id: "task"
+      },{
+        onSuccess: (data) => {
+          setLoading(false);
+          setStep("otp");
+          setOtp(data?.data?.otp)
+        },
+        onError: (error) => {
+          setLoading(false);
+         return handleError(error);
+          }
+      })
 
-      // fake API
-      setTimeout(() => {
-        setStep("otp");
-        setLoading(false);
-      }, 1500);
     } else {
       if (otp.length !== 4) {
         setError("Enter valid OTP");
@@ -42,11 +56,22 @@ export default function login() {
 
       setLoading(true);
 
-      // fake verify
-      setTimeout(() => {
-        setLoading(false);
-        router.replace("/(tabs)"); // go to home
-      }, 1500);
+      await postverifyotpMutation.mutateAsync({
+        phone: phone,
+        client_id: "task",
+        otp: otp
+      },{
+        onSuccess: async (data) => {
+          setLoading(false);
+          await storage.setToken(data?.data?.app_session_id);
+          await storage.setUser(data?.data?.user);
+          router.replace("/(tabs)");
+        },
+        onError: (error) => {
+          setLoading(false);
+         return handleError(error);
+          }
+      })
     }
   };
 
