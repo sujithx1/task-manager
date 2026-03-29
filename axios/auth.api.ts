@@ -5,7 +5,7 @@ import { storage } from "./helper.axios";
 
 
 
-const Auth_URL=process.env.EXPO_PUBLIC_AUTH_URL||"http://localhost:5000"
+const Auth_URL="https://dev-api.mgdh.in/auth/api/v1"
 
 
 
@@ -13,6 +13,9 @@ const Auth_URL=process.env.EXPO_PUBLIC_AUTH_URL||"http://localhost:5000"
 
 const authApi = axios.create({
   baseURL: Auth_URL,
+  headers: {
+    "Content-Type": "application/json",
+  }
 });
 
 
@@ -26,8 +29,8 @@ export const UseSendOtp = () => {
       phone:string,
       client_id:string
     }) => {
-      const res = await authApi.post('/send-otp', data);
-      console.log(res);
+      const res = await authApi.post('/auth/send-otp', data);
+      console.log('res',res);
       return res;
     },
 
@@ -46,9 +49,20 @@ export const UseVerifyOtp = () => {
       client_id:string,
       otp:string
     }) => {
-      const res = await authApi.post('/verify-otp', data);
-      console.log(res);
-      return res;
+      
+      const res = await authApi.post('/auth/verify-otp', data,{
+        headers:{
+          'client-id':'task'
+        }
+      });
+      console.log('verify',res.data); 
+
+      if (res.data) {
+
+          await storage.setToken(res.data.app_session_id);
+
+      }
+      return res.data;
     },
 
   });
@@ -60,8 +74,8 @@ export const UseValidateSession = () => {
       const token= await storage.getToken();
       authApi.defaults.headers.common['app-session-id'] = token;
       const res = await authApi.post('/validate-session');
-      console.log(res);
-      return res;
+      console.log('session',res);
+      return res.data;
     },
   });
 };

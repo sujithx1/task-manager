@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { Stack, useRouter } from "expo-router";
 import { UseSendOtp, UseVerifyOtp } from "@/axios/auth.api";
 import { handleError } from "@/axios/error";
 import { storage } from "@/axios/helper.axios";
+import { Stack, useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function login() {
   const postsendotpMutation = UseSendOtp();
@@ -58,13 +58,12 @@ console.log(process.env.EXPO_PUBLIC_AUTH_URL);
 
       await postverifyotpMutation.mutateAsync({
         phone: phone,
-        client_id: "task",
+        client_id:"task",
         otp: otp
       },{
         onSuccess: async (data) => {
           setLoading(false);
-          await storage.setToken(data?.data?.app_session_id);
-          await storage.setUser(data?.data?.user);
+          // await storage.setUser(data?.data);
           router.replace("/(tabs)");
         },
         onError: (error) => {

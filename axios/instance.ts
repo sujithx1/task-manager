@@ -1,10 +1,13 @@
 import axios from "axios";
 import { storage } from "./helper.axios";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE_URL="htpps://dev-api.mgdh.in/task";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  }
 });
 
 
@@ -12,7 +15,7 @@ const api = axios.create({
 // 🔐 REQUEST INTERCEPTOR
 api.interceptors.request.use(
   async (config) => {
-    const token = await storage.getToken();
+    const token = await storage.getToken(); 
 
     if (token) {
       config.headers["app-session-id"] = token;
